@@ -1,6 +1,9 @@
 
 ## A simple cli for downloading movies from sratim.tv
 
+### Install:
+```GOBIN=/usr/local/bin/ go install ./cmd/sratim```
+
 ### Search
 ![dd](https://cdn.discordapp.com/attachments/843214610425184276/919292780923224184/bruh.gif)
 
