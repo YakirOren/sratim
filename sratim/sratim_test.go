@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"reflect"
+	"sratim/helper"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -193,7 +194,7 @@ func (suite *SratimTestSuite) TestSratim_download() {
 				apiUrl: tt.fields.apiUrl,
 			}
 			writer := &bytes.Buffer{}
-			err := sr.download(tt.movieURL, writer)
+			err := helper.SaveFile(sr.client, tt.movieURL, writer)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("download() error = %v, wantErr %v", err, tt.wantErr)
 				return

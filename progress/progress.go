@@ -2,9 +2,11 @@ package progress
 
 import (
 	"fmt"
-	"github.com/dustin/go-humanize"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dustin/go-humanize"
 )
 
 type WriteCounter struct {
@@ -32,8 +34,7 @@ func (wc *WriteCounter) Write(p []byte) (int, error) {
 func Loader(seconds int) {
 	// Print loading bar progress
 	for i := 0; i < seconds+1; i++ {
-		fmt.Printf("\r%d[%s]", seconds-i, strings.Repeat("=", i)+">"+strings.Repeat(".", seconds-i+1))
-
+		fmt.Printf("\r%-2s[%s]", strconv.Itoa(seconds-i), strings.Repeat("=", i)+">"+strings.Repeat(".", seconds-i))
 		// Sleep for 1 second
 		time.Sleep(1 * time.Second)
 	}

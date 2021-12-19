@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sratim/helper"
 	"sratim/progress"
 	"strings"
 
@@ -19,15 +20,15 @@ import (
 )
 
 const (
-	URL     = "https://Sratim.tv"
-	API_URL = "https://api.Sratim.tv"
+	URL     = "https://sratim.tv"
+	API_URL = "https://api.sratim.tv"
 )
 
 type Sratim struct {
 	client *http.Client
-	token  string
 	url    string
 	apiUrl string
+	token  string
 }
 
 func New(url string, apiUrl string) (*Sratim, error) {
@@ -86,7 +87,11 @@ func (sr *Sratim) init() error {
 
 	sr.client.Jar.SetCookies(u, resp.Cookies())
 
-	resp, err = sr.client.Get(fmt.Sprintf("%s/movie/preWatch", sr.apiUrl))
+	return nil
+}
+
+func (sr *Sratim) GetWatchToken() error {
+	resp, err := sr.client.Get(fmt.Sprintf("%s/movie/preWatch", sr.apiUrl))
 	if err != nil {
 		return err
 	}
@@ -101,7 +106,13 @@ func (sr *Sratim) init() error {
 }
 
 func (sr Sratim) GetMovie(id string) (*Response, error) {
-	progress.Loader(30)
+	const waitTime = 30
+	err := sr.GetWatchToken()
+	if err != nil {
+		return nil, err
+	}
+
+	progress.Loader(waitTime)
 	resp, err := sr.client.Get(fmt.Sprintf("%s/movie/watch/id/%s/token/%s", sr.apiUrl, id, sr.token))
 	if err != nil {
 		return nil, err
@@ -128,25 +139,8 @@ func (sr Sratim) GetMovie(id string) (*Response, error) {
 	return &response, nil
 }
 
-func (sr Sratim) download(movieURL string, writer io.Writer) error {
-	resp, err := sr.client.Get(movieURL)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	counter := &progress.WriteCounter{}
-
-	_, err = io.Copy(writer, io.TeeReader(resp.Body, counter))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (sr Sratim) DownloadMovie(id string) error {
+func (sr Sratim) DownloadMovie(id string, name string) error {
+	const ext = ".mp4"
 	movieURL, err := sr.GetMovieURL(id)
 	if err != nil {
 		return err
@@ -155,12 +149,28 @@ func (sr Sratim) DownloadMovie(id string) error {
 	fileName := filepath.Base(movieURL.Path)
 	// the ID could be used here
 	// but this assures the file is saved in the correct format.
+	if name != "" {
+		fileExtension := filepath.Ext(name)
+		if fileExtension != ext {
+			name = filepath.Base(name) + ext
+		}
+
+		fileName = name
+	}
+
 	file, err := os.Create(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = sr.download(movieURL.String(), file)
+	size, err := helper.GetFileSize(sr.client, movieURL.String())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Downloading %s Total size: %s \n", strings.TrimSpace(fileName), size)
+
+	err = helper.SaveFile(sr.client, movieURL.String(), file)
 	if err != nil {
 		return err
 	}
