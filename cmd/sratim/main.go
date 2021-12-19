@@ -28,10 +28,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if len(results) == 0 {
-		log.Fatal("no results :(")
-	}
-
 	values := map[string]string{}
 	var movieNames []string
 	for _, result := range results {

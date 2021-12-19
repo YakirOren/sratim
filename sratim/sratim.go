@@ -24,14 +24,14 @@ const (
 	API_URL = "https://api.sratim.tv"
 )
 
-type Sratim struct {
+type Client struct {
 	client *http.Client
 	url    string
 	apiUrl string
 	token  string
 }
 
-func New(url string, apiUrl string) (*Sratim, error) {
+func New(url string, apiUrl string) (*Client, error) {
 	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +40,7 @@ func New(url string, apiUrl string) (*Sratim, error) {
 		Jar: jar,
 	}
 
-	a := &Sratim{client: client, url: url, apiUrl: apiUrl}
+	a := &Client{client: client, url: url, apiUrl: apiUrl}
 
 	if a.init() != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func New(url string, apiUrl string) (*Sratim, error) {
 	return a, nil
 }
 
-func (sr Sratim) Search(term string) ([]SearchResult, error) {
+func (sr Client) Search(term string) ([]SearchResult, error) {
 	var result SearchResponse
 
 	form := url.Values{}
@@ -71,10 +71,14 @@ func (sr Sratim) Search(term string) ([]SearchResult, error) {
 		return nil, err
 	}
 
+	if len(result.Results) == 0 {
+		return nil, errors.New("no results :(")
+	}
+
 	return result.Results, nil
 }
 
-func (sr *Sratim) init() error {
+func (sr *Client) init() error {
 	resp, err := sr.client.Get(sr.url)
 	if err != nil {
 		return err
@@ -90,7 +94,7 @@ func (sr *Sratim) init() error {
 	return nil
 }
 
-func (sr *Sratim) GetWatchToken() error {
+func (sr *Client) GetWatchToken() error {
 	resp, err := sr.client.Get(fmt.Sprintf("%s/movie/preWatch", sr.apiUrl))
 	if err != nil {
 		return err
@@ -105,7 +109,7 @@ func (sr *Sratim) GetWatchToken() error {
 	return nil
 }
 
-func (sr Sratim) GetMovie(id string) (*Response, error) {
+func (sr Client) GetMovie(id string) (*Response, error) {
 	const waitTime = 30
 	err := sr.GetWatchToken()
 	if err != nil {
@@ -139,7 +143,7 @@ func (sr Sratim) GetMovie(id string) (*Response, error) {
 	return &response, nil
 }
 
-func (sr Sratim) DownloadMovie(id string, name string) error {
+func (sr Client) DownloadMovie(id string, name string) error {
 	const ext = ".mp4"
 	movieURL, err := sr.GetMovieURL(id)
 	if err != nil {
@@ -178,7 +182,7 @@ func (sr Sratim) DownloadMovie(id string, name string) error {
 	return nil
 }
 
-func (sr Sratim) GetMovieURL(id string) (*url.URL, error) {
+func (sr Client) GetMovieURL(id string) (*url.URL, error) {
 	response, err := sr.GetMovie(id)
 	if err != nil {
 		return nil, err

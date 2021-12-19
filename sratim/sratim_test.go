@@ -23,7 +23,7 @@ const (
 
 type SratimTestSuite struct {
 	suite.Suite
-	client *Sratim
+	client *Client
 
 	main *httptest.Server
 	api  *httptest.Server
@@ -129,7 +129,7 @@ func (suite *SratimTestSuite) TestSratim_GetMovieURL() {
 	}
 	tests := []struct {
 		name    string
-		client  *Sratim
+		client  *Client
 		args    args
 		want    string
 		wantErr bool
@@ -146,7 +146,7 @@ func (suite *SratimTestSuite) TestSratim_GetMovieURL() {
 	}
 	for _, tt := range tests {
 		suite.T().Run(tt.name, func(t *testing.T) {
-			sr := Sratim{
+			sr := Client{
 				client: tt.client.client,
 				token:  tt.client.token,
 				url:    tt.client.url,
@@ -172,7 +172,7 @@ func (suite *SratimTestSuite) TestSratim_GetMovieURL() {
 func (suite *SratimTestSuite) TestSratim_download() {
 	tests := []struct {
 		name       string
-		fields     *Sratim
+		fields     *Client
 		movieURL   string
 		wantWriter string
 		wantErr    bool
@@ -187,7 +187,7 @@ func (suite *SratimTestSuite) TestSratim_download() {
 	}
 	for _, tt := range tests {
 		suite.T().Run(tt.name, func(t *testing.T) {
-			sr := Sratim{
+			sr := Client{
 				client: tt.fields.client,
 				token:  tt.fields.token,
 				url:    tt.fields.url,
