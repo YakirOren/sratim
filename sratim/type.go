@@ -18,5 +18,3 @@ type Response struct {
 		URL string `json:"480"`
 	} `json:"watch,omitempty"`
 }
-
-

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sratim/sratim"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	log "github.com/sirupsen/logrus"
@@ -27,10 +28,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if len(results) == 0 {
-		log.Fatal("no results :(")
-	}
-
 	values := map[string]string{}
 	var movieNames []string
 	for _, result := range results {
@@ -49,7 +46,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = client.DownloadMovie(values[selectedMovie])
+	engMovieName := strings.Split(selectedMovie, "/")[1]
+
+	err = client.DownloadMovie(values[selectedMovie], engMovieName)
 	if err != nil {
 		log.Fatal(err)
 	}
