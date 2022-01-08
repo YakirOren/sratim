@@ -46,7 +46,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	engMovieName := strings.Split(selectedMovie, "/")[1]
+	engMovieName := strings.TrimSpace(strings.Split(selectedMovie, "/")[1])
 
 	err = client.DownloadMovie(values[selectedMovie], engMovieName)
 	if err != nil {
