@@ -15,6 +15,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if client == nil{
+		log.Fatalf("No connection to %s", sratim.URL)
+	}
+
 	movieName := ""
 	prompt := &survey.Input{Message: "Search movie: "}
 
